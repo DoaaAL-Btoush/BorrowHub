@@ -1,0 +1,148 @@
+.add-item-page {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #fff7ed, #f0fdf4);
+  padding: 35px 0;
+  font-family: ui-sans-serif,system-ui,sans-serif;
+}
+
+.add-item-container {
+  width: 700px;
+  margin: 0 auto;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 18px;
+  text-decoration: none;
+  color: #374151;
+  font-size: 14px;
+}
+
+.back-link:hover {
+  color: #f97316;
+}
+
+.add-item-card {
+  padding: 32px;
+  border-radius: 18px;
+  background-color: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-sizing:border-box;
+}
+
+.add-item-card h1 {
+  color: #111827;
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.add-item-card p {
+  color: #6b7280;
+  margin-bottom: 25px;
+}
+
+.add-item-card form label {
+  display: block;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.add-item-card input,
+.add-item-card textarea,
+.add-item-card select {
+  width: 100%;
+  padding: 13px;
+  margin-bottom: 20px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  outline: none;
+  font-size: 14px;
+}
+
+.add-item-card textarea {
+  height: 95px;
+  resize: none;
+}
+
+.add-item-card input:focus,
+.add-item-card textarea:focus,
+.add-item-card select:focus {
+  border-color: #f97316;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.upload-box {
+  height: 130px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #64748b;
+  font-family:ui-sans-serif,system-ui,sans-serif;
+  margin-bottom: 24px;
+}
+
+.upload-icon {
+  font-size: 38px;
+  color: #94a3b8;
+}
+
+.upload-box p {
+  margin: 5px 0;
+  color: #475569;
+}
+
+.upload-box span {
+  font-size: 12px;
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.add-btn {
+  padding: 14px;
+  border: none;
+  border-radius: 9px;
+  background-color: #f97316;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  padding: 14px;
+  border: none;
+  border-radius: 9px;
+  background-color: #f3f4f6;
+  color: #111827;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background-color: #ea580c;
+}
+
+.cancel-btn:hover {
+  background-color: #e5e7eb;
+}
+.upload-box {
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.upload-box:hover {
+  border-color: #f97316;
+}

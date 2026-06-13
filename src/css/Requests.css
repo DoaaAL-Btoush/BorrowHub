@@ -1,0 +1,156 @@
+.requests-page {
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(120deg, #fff7ed, #f0fdf4);
+  padding: 45px 0;
+}
+
+.requests-container {
+  width: 72%;
+  margin: 0 auto;
+}
+
+.requests-container h1 {
+  font-size: 34px;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.requests-container > p {
+  color: #374151;
+  font-size: 17px;
+  margin-bottom: 35px;
+}
+
+.request-filters {
+  padding: 28px;
+  border-radius: 20px;
+  background-color: white;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.request-filter {
+  padding: 14px 22px;
+  border: none;
+  border-radius: 14px;
+  background-color: #f3f4f6;
+  color: #111827;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.active-request-filter {
+  background-color: #f97316;
+  color: white;
+  box-shadow: 0 6px 14px rgba(249, 115, 22, 0.35);
+}
+
+.request-card {
+  padding: 28px;
+  border-radius: 18px;
+  background-color: white;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.request-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.request-avatar {
+  font-size: 38px;
+}
+
+.request-user h3 {
+  color: #111827;
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.request-user p {
+  color: #374151;
+  font-size: 16px;
+}
+
+.request-status {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.pending {
+  background-color: #fef3c7;
+  color: #ca8a04;
+}
+
+.approved {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.rejected {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.request-message {
+  margin: 25px 0;
+  padding: 18px;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  color: #111827;
+  font-size: 16px;
+}
+
+.request-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.request-footer p {
+  color: #6b7280;
+}
+
+.request-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.approve-btn,
+.reject-btn {
+  padding: 13px 22px;
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.approve-btn {
+  background-color: #22c55e;
+}
+
+.reject-btn {
+  background-color: #ef4444;
+}
+
+.approve-btn:hover {
+  background-color: #16a34a;
+}
+
+.reject-btn:hover {
+  background-color: #dc2626;
+}

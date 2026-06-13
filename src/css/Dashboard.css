@@ -1,0 +1,157 @@
+.dashboard-page {
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(120deg, #fff7ed, #f0fdf4);
+  padding: 40px 0;
+}
+
+.dashboard-container {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.dashboard-container h1 {
+  font-size: 34px;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.dashboard-container > p {
+  color: #374151;
+  font-size: 17px;
+  margin-bottom: 35px;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 35px;
+}
+
+.dashboard-card {
+  height: 160px;
+  border-radius: 18px;
+  padding: 28px;
+  color: white;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+}
+
+.dashboard-card span {
+  font-size: 34px;
+}
+
+.dashboard-card p {
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.dashboard-card h2 {
+  font-size: 34px;
+  margin-top: 10px;
+}
+
+.orange-stat {
+  background: linear-gradient(120deg, #f97316, #ea580c);
+}
+
+.green-stat {
+  background: linear-gradient(120deg, #22c55e, #16a34a);
+}
+
+.blue-stat {
+  background: linear-gradient(120deg, #3b82f6, #2563eb);
+}
+
+.my-items-section {
+  padding: 32px;
+  border-radius: 22px;
+  background-color: white;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.section-title-row h2 {
+  font-size: 28px;
+  color: #111827;
+}
+
+.section-title-row button {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 12px;
+  background-color: #f97316;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.section-title-row button:hover {
+  background-color: #ea580c;
+}
+
+.my-item-row {
+  padding: 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.my-item-info {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.my-item-icon {
+  width: 65px;
+  height: 65px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #fff7ed, #dcfce7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 34px;
+}
+
+.my-item-info h3 {
+  color: #111827;
+  font-size: 21px;
+}
+
+.my-item-info p {
+  color: #4b5563;
+  margin: 6px 0;
+}
+
+.my-item-actions {
+  display: flex;
+  gap: 14px;
+}
+
+.my-item-actions button {
+  border: none;
+  background-color: transparent;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.dashboard-empty {
+  text-align: center;
+  padding: 40px;
+  border: 2px dashed #fdba74;
+  border-radius: 16px;
+  background-color: #fff7ed;
+}
+
+.dashboard-empty h3 {
+  color: #ea580c;
+  margin-bottom: 8px;
+}
