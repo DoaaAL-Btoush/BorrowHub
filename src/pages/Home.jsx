@@ -1,11 +1,14 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import HeroSection from "../components/HeroSection";
 import FeatureSection from "../components/FeatureSection";
 import SearchFilters from "../components/SearchFilters";
 import ItemsGrid from "../components/ItemsGrid";
 
 function Home() {
-  const role = "user";
+  const loggedInUser =
+    JSON.parse(localStorage.getItem("currentUser")) || {};
+
+  const role = loggedInUser.role || localStorage.getItem("role") || "user";
 
   const itemsSectionRef = useRef(null);
 
@@ -13,50 +16,44 @@ function Home() {
     itemsSectionRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
-  const defaultItems = [
-    {
-      id: 1,
-      name: "Electric Drill",
-      description:
-        "18V cordless drill with battery and charger. Perfect for home improvement projects.",
-      category: "Tools",
-      status: "Available",
-      owner: "John Smith",
-      location: "Downtown",
-      icon: "🔨",
-    },
-    {
-      id: 2,
-      name: "Camping Tent",
-      description:
-        "4-person tent, waterproof and easy to set up. Great for weekend trips.",
-      category: "Sports & Outdoors",
-      status: "Available",
-      owner: "Sarah Johnson",
-      location: "North Side",
-      icon: "🏕️",
-    },
-    {
-      id: 3,
-      name: "Digital Camera",
-      description:
-        "DSLR camera with lens. Perfect for photography enthusiasts.",
-      category: "Electronics",
-      status: "Borrowed",
-      owner: "Mike Davis",
-      location: "East End",
-      icon: "📷",
-    },
-  ];
-
-  const [items, setItems] = useState(() => {
-    const savedItems = localStorage.getItem("items");
-
-    return savedItems ? JSON.parse(savedItems) : defaultItems;
-  });
-
+  const [items, setItems] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  useEffect(() => {
+    const getItems = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/items");
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.log(data.message || "Error retrieving items");
+          return;
+        }
+
+        const formattedItems = data.map((item) => ({
+          id: item.item_id,
+          name: item.name,
+          description: item.description,
+          category: item.category,
+          status: item.status,
+          ownerId: item.user_id,
+          location: item.location,
+          condition: item.condition,
+          imagePath: item.image_path,
+          imageUrl: item.image_path
+            ? `http://localhost:3000${item.image_path}`
+            : "http://localhost:3000/uploads/default-item.png",
+        }));
+
+        setItems(formattedItems);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getItems();
+  }, []);
 
   const filteredItems = items.filter((item) => {
     const matchesSearch = item.name
@@ -72,12 +69,13 @@ function Home() {
   const stats = {
     items: items.length,
     members: 0,
-    borrows: 0,
+    borrows: items.filter((item) => item.status === "Borrowed").length,
   };
 
   return (
     <>
       <HeroSection role={role} stats={stats} scrollToItems={scrollToItems} />
+
       <FeatureSection />
 
       <div ref={itemsSectionRef}>

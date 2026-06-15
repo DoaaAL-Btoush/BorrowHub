@@ -8,47 +8,59 @@ function AddItem() {
   const loggedInUser =
     JSON.parse(localStorage.getItem("currentUser")) || {};
 
-  const currentUserName = loggedInUser.name || "Current User";
-  const currentUserEmail = loggedInUser.email || "";
+  const currentUserId = loggedInUser.id;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Tools");
   const [condition, setCondition] = useState("Good");
   const [location, setLocation] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
-  const handleAddItem = (e) => {
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      setImageFile(file);
+    }
+  };
+
+  const handleAddItem = async (e) => {
     e.preventDefault();
 
-    const existingItems =
-      JSON.parse(localStorage.getItem("items")) || [];
+    const formData = new FormData();
 
-    const newItem = {
-      id: Date.now(),
-      name: title,
-      description,
-      category,
-      condition,
-      location,
-      status: "Available",
-      owner: currentUserName,
-      ownerEmail: currentUserEmail,
+    formData.append("user_id", currentUserId);
+    formData.append("created_date", new Date().toISOString().split("T")[0]);
+    formData.append("description", description);
+    formData.append("category", category);
+    formData.append("condition", condition);
+    formData.append("status", "Available");
+    formData.append("location", location);
+    formData.append("name", title);
 
-      icon:
-        category === "Tools"
-          ? "🔨"
-          : category === "Electronics"
-          ? "📷"
-          : category === "Sports & Outdoors"
-          ? "🏕️"
-          : "📦",
-    };
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
 
-    const updatedItems = [...existingItems, newItem];
+    try {
+      const response = await fetch("http://localhost:3000/items", {
+        method: "POST",
+        body: formData,
+      });
 
-    localStorage.setItem("items", JSON.stringify(updatedItems));
+      const data = await response.json();
 
-    navigate("/home");
+      if (!response.ok) {
+        alert(data.message || "Failed to add item.");
+        return;
+      }
+
+      navigate("/home");
+    } catch (error) {
+      console.log(error);
+      alert("Cannot connect to the server.");
+    }
   };
 
   return (
@@ -122,11 +134,28 @@ function AddItem() {
 
             <label>Item Photo</label>
 
-            <div className="upload-box">
+            <label className="upload-box">
+              <input
+                type="file"
+                accept="image/png, image/jpeg, image/jpg"
+                onChange={handleImageChange}
+                hidden
+              />
+
               <div className="upload-icon">⇧</div>
-              <p>Click to upload or drag and drop</p>
-              <span>PNG, JPG up to 10MB</span>
-            </div>
+
+              {imageFile ? (
+                <>
+                  <p>{imageFile.name}</p>
+                  <span>Image selected</span>
+                </>
+              ) : (
+                <>
+                  <p>Click to upload or drag and drop</p>
+                  <span>PNG, JPG up to 10MB</span>
+                </>
+              )}
+            </label>
 
             <div className="form-actions">
               <button type="submit" className="add-btn">

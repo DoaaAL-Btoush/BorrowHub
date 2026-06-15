@@ -1,67 +1,41 @@
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../css/ItemDetails.css";
 
 function ItemDetails() {
   const loggedInUser =
     JSON.parse(localStorage.getItem("currentUser")) || {};
 
-  const role =
-    loggedInUser.role || localStorage.getItem("role") || "user";
+  const role = loggedInUser.role || localStorage.getItem("role") || "user";
 
-  const currentUserName = loggedInUser.name || "Guest";
-  const currentUserEmail = loggedInUser.email || "";
+  const currentUserId = loggedInUser.id;
 
   const { id } = useParams();
 
+  const [item, setItem] = useState(null);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [message, setMessage] = useState("");
 
-  const defaultItems = [
-    {
-      id: 1,
-      name: "Electric Drill",
-      description:
-        "18V cordless drill with battery and charger. Perfect for home improvement projects.",
-      category: "Tools",
-      condition: "Excellent",
-      status: "Available",
-      owner: "John Smith",
-      ownerEmail: "john.smith@email.com",
-      location: "Downtown",
-      icon: "🔨",
-    },
-    {
-      id: 2,
-      name: "Camping Tent",
-      description:
-        "4-person tent, waterproof and easy to set up. Great for weekend trips.",
-      category: "Sports & Outdoors",
-      condition: "Excellent",
-      status: "Available",
-      owner: "Sarah Johnson",
-      ownerEmail: "sarah.j@email.com",
-      location: "North Side",
-      icon: "🏕️",
-    },
-    {
-      id: 3,
-      name: "Digital Camera",
-      description:
-        "DSLR camera with lens. Perfect for photography enthusiasts.",
-      category: "Electronics",
-      condition: "Excellent",
-      status: "Borrowed",
-      owner: "Mike Davis",
-      ownerEmail: "mike.davis@email.com",
-      location: "East End",
-      icon: "📷",
-    },
-  ];
+  useEffect(() => {
+    const getItem = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/items/${id}`);
+        const data = await response.json();
 
-  const savedItems = JSON.parse(localStorage.getItem("items")) || defaultItems;
+        if (!response.ok) {
+          setItem(null);
+          return;
+        }
 
-  const item = savedItems.find((item) => item.id === Number(id));
+        setItem(data);
+      } catch (error) {
+        console.log(error);
+        setItem(null);
+      }
+    };
+
+    getItem();
+  }, [id]);
 
   if (!item) {
     return (
@@ -72,42 +46,47 @@ function ItemDetails() {
     );
   }
 
-  const isOwner =
-    item.ownerEmail === currentUserEmail ||
-    item.owner === currentUserName;
+  const isOwner = item.user_id === currentUserId;
 
-  const handleSendRequest = (e) => {
+  const handleSendRequest = async (e) => {
     e.preventDefault();
 
     if (isOwner || role === "admin") {
       return;
     }
 
-    const existingRequests =
-      JSON.parse(localStorage.getItem("requests")) || [];
-
-    const request = {
-      id: Date.now(),
-      requester: currentUserName,
-      requesterEmail: currentUserEmail,
-      owner: item.owner,
-      ownerEmail: item.ownerEmail,
-      item: item.name,
-      itemId: item.id,
-      message,
+    const newRequest = {
+      requester_id: currentUserId,
+      message: message,
       status: "Pending",
-      date: new Date().toISOString().split("T")[0],
-      icon: "👩",
+      request_date: new Date().toISOString().split("T")[0],
+      item_id: item.item_id,
     };
 
-    const updatedRequests = [...existingRequests, request];
+    try {
+      const response = await fetch("http://localhost:3000/requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newRequest),
+      });
 
-    localStorage.setItem("requests", JSON.stringify(updatedRequests));
+      const data = await response.json();
 
-    setMessage("");
-    setShowRequestForm(false);
+      if (!response.ok) {
+        alert(data.message || "Failed to send request.");
+        return;
+      }
 
-    alert("Borrow request sent successfully.");
+      setMessage("");
+      setShowRequestForm(false);
+
+      alert("Borrow request sent successfully.");
+    } catch (error) {
+      console.log(error);
+      alert("Cannot connect to the server.");
+    }
   };
 
   return (
@@ -120,7 +99,13 @@ function ItemDetails() {
 
       <div className="details-page">
         <div className="details-image">
-          <span>{item.icon}</span>
+          <img
+            src={`http://localhost:3000${item.image_path}`}
+            alt={item.name}
+            onError={(e) => {
+              e.target.style.display = "none";
+            }}
+          />
         </div>
 
         <div className="details-card">
@@ -162,7 +147,7 @@ function ItemDetails() {
             <span>👩</span>
 
             <div>
-              <h3>{item.owner}</h3>
+              <h3>User #{item.user_id}</h3>
               <p>Community Member</p>
             </div>
           </div>

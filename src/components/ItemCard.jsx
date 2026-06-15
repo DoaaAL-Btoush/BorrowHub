@@ -6,13 +6,28 @@ function ItemCard({ item }) {
     <Link to={`/items/${item.id}`} className="item-card-link">
       <div className="item-card">
         <div className="item-image">
-          <span>{item.icon}</span>
+          <img
+            src={item.imageUrl}
+            alt={item.name}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src =
+                "http://localhost:3000/uploads/default-item.png";
+            }}
+          />
         </div>
 
         <div className="item-content">
           <div className="item-title-row">
             <h3>{item.name}</h3>
-            <span className={item.status === "Available" ? "status available" : "status borrowed"}>
+
+            <span
+              className={
+                item.status === "Available"
+                  ? "status available"
+                  : "status borrowed"
+              }
+            >
               {item.status}
             </span>
           </div>
@@ -20,7 +35,6 @@ function ItemCard({ item }) {
           <p>{item.description}</p>
 
           <div className="item-owner">
-            <span>👤 {item.owner}</span>
             <span>📍 {item.location}</span>
           </div>
 

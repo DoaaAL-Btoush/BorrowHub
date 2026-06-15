@@ -10,44 +10,51 @@ function Signup() {
 
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-
-    const existingUser = users.find((user) => user.email === email);
-
-    if (existingUser) {
-      alert("This email is already registered.");
-      return;
-    }
-
     const newUser = {
-      id: Date.now(),
-      fullName,
-      email,
-      password,
+      full_name: fullName,
+      email: email,
+      password: password,
       role: "user",
       status: "active",
-      joinedDate: new Date().toISOString().split("T")[0],
+      joined_date: new Date().toISOString().split("T")[0],
     };
 
-    const updatedUsers = [...users, newUser];
+    try {
+      const response = await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      });
 
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
+      const data = await response.json();
 
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({
-        name: fullName,
-        email,
-        role: "user",
-      })
-    );
+      if (!response.ok) {
+        alert(data.message || "Signup failed.");
+        return;
+      }
 
-    localStorage.setItem("role", "user");
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify({
+          id: data.user_id,
+          name: data.full_name,
+          email: data.email,
+          role: data.role,
+        })
+      );
 
-    navigate("/home");
+      localStorage.setItem("role", data.role);
+
+      navigate("/home");
+    } catch (error) {
+      console.log(error);
+      alert("Cannot connect to the server.");
+    }
   };
 
   return (

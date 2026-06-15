@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/Dashboard.css";
 
@@ -8,45 +8,78 @@ function Dashboard() {
   const loggedInUser =
     JSON.parse(localStorage.getItem("currentUser")) || {};
 
-  const currentUserName = loggedInUser.name || "Guest";
-  const currentUserEmail = loggedInUser.email || "";
+  const currentUserId = loggedInUser.id;
 
-  const [items, setItems] = useState(
-    JSON.parse(localStorage.getItem("items")) || []
-  );
+  const [items, setItems] = useState([]);
+  const [requests, setRequests] = useState([]);
 
-  const requests = JSON.parse(localStorage.getItem("requests")) || [];
+  useEffect(() => {
+    getItems();
+    getRequests();
+  }, []);
+
+  const getItems = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/items");
+      const data = await response.json();
+
+      setItems(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getRequests = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/requests");
+      const data = await response.json();
+
+      setRequests(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const myItems = items.filter(
-    (item) =>
-      item.ownerEmail === currentUserEmail ||
-      item.owner === currentUserName
+    (item) => item.user_id === currentUserId
   );
 
   const pendingRequests = requests.filter(
     (request) =>
-      (request.ownerEmail === currentUserEmail ||
-        request.owner === currentUserName) &&
+      myItems.some((item) => item.item_id === request.item_id) &&
       request.status === "Pending"
   );
 
   const borrowedItems = requests.filter(
     (request) =>
-      request.requesterEmail === currentUserEmail &&
+      request.requester_id === currentUserId &&
       request.status === "Approved"
   );
 
-  const handleDeleteItem = (id, status) => {
+  const handleDeleteItem = async (id, status) => {
     if (status === "Borrowed") {
       alert("This item cannot be deleted because it is currently borrowed.");
       return;
     }
 
-    const updatedItems = items.filter((item) => item.id !== id);
+    try {
+      const response = await fetch(`http://localhost:3000/items/${id}`, {
+        method: "DELETE",
+      });
 
-    localStorage.setItem("items", JSON.stringify(updatedItems));
+      const data = await response.json();
 
-    setItems(updatedItems);
+      if (!response.ok) {
+        alert(data.message || "Failed to delete item.");
+        return;
+      }
+
+      const updatedItems = items.filter((item) => item.item_id !== id);
+      setItems(updatedItems);
+    } catch (error) {
+      console.log(error);
+      alert("Cannot connect to the server.");
+    }
   };
 
   return (
@@ -92,9 +125,20 @@ function Dashboard() {
             </div>
           ) : (
             myItems.map((item) => (
-              <div className="my-item-row" key={item.id}>
+              <div className="my-item-row" key={item.item_id}>
                 <div className="my-item-info">
-                  <div className="my-item-icon">{item.icon}</div>
+                  <div className="my-item-icon">
+                    <img
+                      src={`http://localhost:3000${item.image_path}`}
+                      alt={item.name}
+                      style={{
+                        width: "55px",
+                        height: "55px",
+                        objectFit: "cover",
+                        borderRadius: "10px",
+                      }}
+                    />
+                  </div>
 
                   <div>
                     <h3>{item.name}</h3>
@@ -113,12 +157,16 @@ function Dashboard() {
                 </div>
 
                 <div className="my-item-actions">
-                  <button onClick={() => navigate(`/edit-item/${item.id}`)}>
+                  <button
+                    onClick={() => navigate(`/edit-item/${item.item_id}`)}
+                  >
                     ✏️
                   </button>
 
                   <button
-                    onClick={() => handleDeleteItem(item.id, item.status)}
+                    onClick={() =>
+                      handleDeleteItem(item.item_id, item.status)
+                    }
                   >
                     🗑️
                   </button>

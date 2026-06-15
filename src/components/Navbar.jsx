@@ -10,9 +10,12 @@ import { FiUser } from "react-icons/fi";
 function Navbar({ role }) {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    navigate("/login");
-  };
+ const handleLogout = () => {
+  localStorage.removeItem("currentUser");
+  localStorage.removeItem("role");
+
+  navigate("/login");
+};
 
   return (
     <nav className="navbar">

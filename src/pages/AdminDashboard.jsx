@@ -1,36 +1,47 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../css/Admin.css";
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [searchUser, setSearchUser] = useState("");
 
-  const [users, setUsers] = useState(
-    JSON.parse(localStorage.getItem("users")) || []
-  );
+  const [users, setUsers] = useState([]);
+  const [items, setItems] = useState([]);
+  const [requests, setRequests] = useState([]);
 
-  const items = JSON.parse(localStorage.getItem("items")) || [];
-  const requests = JSON.parse(localStorage.getItem("requests")) || [];
+  useEffect(() => {
+    getUsers();
+    getItems();
+    getRequests();
+  }, []);
+
+  const getUsers = async () => {
+    const response = await fetch("http://localhost:3000/users");
+    const data = await response.json();
+    setUsers(data);
+  };
+
+  const getItems = async () => {
+    const response = await fetch("http://localhost:3000/items");
+    const data = await response.json();
+    setItems(data);
+  };
+
+  const getRequests = async () => {
+    const response = await fetch("http://localhost:3000/requests");
+    const data = await response.json();
+    setRequests(data);
+  };
 
   const availableItems = items.filter((item) => item.status === "Available");
-
-  const pendingRequests = requests.filter(
-    (request) => request.status === "Pending"
-  );
-
-  const activeUsers = users.filter(
-    (user) => user.status !== "Suspended"
-  );
+  const pendingRequests = requests.filter((request) => request.status === "Pending");
+  const activeUsers = users.filter((user) => user.status !== "Suspended");
 
   const categoryCounts = {
     Tools: items.filter((item) => item.category === "Tools").length,
-    "Sports & Outdoors": items.filter(
-      (item) => item.category === "Sports & Outdoors"
-    ).length,
+    "Sports & Outdoors": items.filter((item) => item.category === "Sports & Outdoors").length,
     Electronics: items.filter((item) => item.category === "Electronics").length,
-    Entertainment: items.filter(
-      (item) => item.category === "Entertainment"
-    ).length,
+    Entertainment: items.filter((item) => item.category === "Entertainment").length,
   };
 
   const totalItems = items.length;
@@ -40,42 +51,68 @@ function AdminDashboard() {
   };
 
   const latestItem = items.length > 0 ? items[items.length - 1] : null;
-  const latestRequest =
-    requests.length > 0 ? requests[requests.length - 1] : null;
+  const latestRequest = requests.length > 0 ? requests[requests.length - 1] : null;
   const latestUser = users.length > 0 ? users[users.length - 1] : null;
 
-  const filteredUsers = users.filter((user) =>
-    user.fullName.toLowerCase().includes(searchUser.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchUser.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.full_name.toLowerCase().includes(searchUser.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchUser.toLowerCase())
   );
 
-  const toggleUserStatus = (email) => {
-    const updatedUsers = users.map((user) =>
-      user.email === email
-        ? {
-            ...user,
-            status: user.status === "Suspended" ? "active" : "Suspended",
-          }
-        : user
-    );
+  const toggleUserStatus = async (user) => {
+    const newStatus = user.status === "Suspended" ? "active" : "Suspended";
 
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    setUsers(updatedUsers);
+    const updatedUser = {
+      full_name: user.full_name,
+      email: user.email,
+      password: user.password,
+      role: user.role,
+      status: newStatus,
+      joined_date: String(user.joined_date).split("T")[0],
+    };
+
+    const response = await fetch(`http://localhost:3000/users/${user.user_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedUser),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Failed to update user.");
+      return;
+    }
+
+    setUsers(
+      users.map((u) => (u.user_id === user.user_id ? data : u))
+    );
   };
 
   const getUserItemsCount = (user) => {
-    return items.filter(
-      (item) =>
-        item.ownerEmail === user.email || item.owner === user.fullName
-    ).length;
+    return items.filter((item) => item.user_id === user.user_id).length;
   };
 
   const getUserRequestsCount = (user) => {
-    return requests.filter(
-      (request) =>
-        request.requesterEmail === user.email ||
-        request.requester === user.fullName
-    ).length;
+    return requests.filter((request) => request.requester_id === user.user_id).length;
+  };
+
+  const handleDeleteItem = async (id) => {
+    const response = await fetch(`http://localhost:3000/items/${id}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Failed to delete item.");
+      return;
+    }
+
+    setItems(items.filter((item) => item.item_id !== id));
   };
 
   return (
@@ -167,7 +204,7 @@ function AdminDashboard() {
                     </h4>
                     <p>
                       {latestItem
-                        ? `by ${latestItem.owner}`
+                        ? `by user #${latestItem.user_id}`
                         : "No activity yet"}
                     </p>
                   </div>
@@ -178,7 +215,7 @@ function AdminDashboard() {
                   <div>
                     <h4>
                       {latestRequest
-                        ? `Borrow request for "${latestRequest.item}"`
+                        ? `Borrow request for item #${latestRequest.item_id}`
                         : "No borrow requests yet"}
                     </h4>
                     <p>
@@ -194,7 +231,7 @@ function AdminDashboard() {
                   <div>
                     <h4>
                       {latestUser
-                        ? `New user registered: ${latestUser.fullName}`
+                        ? `New user registered: ${latestUser.full_name}`
                         : "No users registered yet"}
                     </h4>
                     <p>{users.length} community members</p>
@@ -212,9 +249,7 @@ function AdminDashboard() {
                   <div className="progress">
                     <div
                       className="tools-bar"
-                      style={{
-                        width: `${getPercentage(categoryCounts.Tools)}%`,
-                      }}
+                      style={{ width: `${getPercentage(categoryCounts.Tools)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -222,9 +257,7 @@ function AdminDashboard() {
                 <div className="category-row">
                   <p>
                     Sports & Outdoors{" "}
-                    <span>
-                      {getPercentage(categoryCounts["Sports & Outdoors"])}%
-                    </span>
+                    <span>{getPercentage(categoryCounts["Sports & Outdoors"])}%</span>
                   </p>
                   <div className="progress">
                     <div
@@ -305,13 +338,16 @@ function AdminDashboard() {
                   </tr>
                 ) : (
                   filteredUsers.map((user) => (
-                    <tr key={user.email}>
+                    <tr key={user.user_id}>
                       <td>
                         <div className="user-info">
                           <span>👩</span>
                           <div>
-                            <strong>{user.fullName}</strong>
-                            <p>Joined {user.joinedDate || "recently"}</p>
+                            <strong>{user.full_name}</strong>
+                            <p>
+                              Joined{" "}
+                              {String(user.joined_date).split("T")[0]}
+                            </p>
                           </div>
                         </div>
                       </td>
@@ -347,7 +383,7 @@ function AdminDashboard() {
                               ? "activate-btn"
                               : "suspend-btn"
                           }
-                          onClick={() => toggleUserStatus(user.email)}
+                          onClick={() => toggleUserStatus(user)}
                         >
                           {user.status === "Suspended"
                             ? "Activate"
@@ -363,92 +399,93 @@ function AdminDashboard() {
         )}
 
         {activeTab === "content" && (
-  <div className="admin-panel-card">
-    <h3>Content Moderation</h3>
+          <div className="admin-panel-card content-moderation-card">
+            <h3>Content Moderation</h3>
 
-    <p>
-      Review and remove inappropriate or policy-violating items
-    </p>
+            <p>Review and remove inappropriate or policy-violating items</p>
 
-    <table className="users-table">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Owner</th>
-          <th>Category</th>
-          <th>Condition</th>
-          <th>Status</th>
-          <th>Location</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+            <table className="users-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Owner</th>
+                  <th>Category</th>
+                  <th>Condition</th>
+                  <th>Status</th>
+                  <th>Location</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-      <tbody>
-        {items.length === 0 ? (
-          <tr>
-            <td colSpan="7">No items available.</td>
-          </tr>
-        ) : (
-          items.map((item) => (
-            <tr key={item.id}>
-              <td>
-                <div className="user-info">
-                  <span>{item.icon}</span>
+              <tbody>
+                {items.length === 0 ? (
+                  <tr>
+                    <td colSpan="7">No items available.</td>
+                  </tr>
+                ) : (
+                  items.map((item) => (
+                    <tr key={item.item_id}>
+                      <td>
+                        <div className="user-info">
+                          <img
+                            src={`http://localhost:3000${item.image_path}`}
+                            alt={item.name}
+                            style={{
+                              width: "38px",
+                              height: "38px",
+                              objectFit: "cover",
+                              borderRadius: "8px",
+                            }}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                "http://localhost:3000/uploads/default-item.png";
+                            }}
+                          />
 
-                  <strong>{item.name}</strong>
-                </div>
-              </td>
+                          <strong>{item.name}</strong>
+                        </div>
+                      </td>
 
-              <td>{item.owner}</td>
+                      <td>User #{item.user_id}</td>
 
-              <td>
-                <span className="category-badge">
-                  {item.category}
-                </span>
-              </td>
+                      <td>
+                        <span className="category-badge">
+                          {item.category}
+                        </span>
+                      </td>
 
-              <td>{item.condition}</td>
+                      <td>{item.condition}</td>
 
-              <td>
-                <span
-                    className={
-                    item.status === "Available"
-                        ? "status-badge-available"
-                        : "status-badge-borrowed"
-                    }
-                >
-                    {item.status}
-                </span>
-                </td>
+                      <td>
+                        <span
+                          className={
+                            item.status === "Available"
+                              ? "status-badge-available"
+                              : "status-badge-borrowed"
+                          }
+                        >
+                          {item.status}
+                        </span>
+                      </td>
 
-              <td>{item.location}</td>
+                      <td>{item.location}</td>
 
-              <td>
-                <button
-                  className="delete-item-btn"
-                  onClick={() => {
-                    const updatedItems = items.filter(
-                      (i) => i.id !== item.id
-                    );
-
-                    localStorage.setItem(
-                      "items",
-                      JSON.stringify(updatedItems)
-                    );
-
-                    window.location.reload();
-                  }}
-                >
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          ))
+                      <td>
+                        <button
+                          className="delete-item-btn"
+                          onClick={() => handleDeleteItem(item.item_id)}
+                        >
+                          🗑️
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
-      </tbody>
-    </table>
-  </div>
-)}
       </div>
     </div>
   );

@@ -9,13 +9,8 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-
-    console.log({
-      email,
-      password,
-    });
 
     if (email.toLowerCase().includes("admin")) {
       localStorage.setItem("role", "admin");
@@ -24,7 +19,7 @@ function Login() {
         "currentUser",
         JSON.stringify({
           name: "Admin",
-          email,
+          email: email,
           role: "admin",
         })
       );
@@ -33,34 +28,41 @@ function Login() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+    try {
+      const response = await fetch("http://localhost:3000/users");
+      const users = await response.json();
 
-    const user = users.find(
-      (user) => user.email === email && user.password === password
-    );
+      const user = users.find(
+        (user) => user.email === email && user.password === password
+      );
 
-    if (!user) {
-      alert("Invalid email or password.");
-      return;
+      if (!user) {
+        alert("Invalid email or password.");
+        return;
+      }
+
+      if (user.status === "Suspended") {
+        alert("Your account has been suspended. Please contact the administrator.");
+        return;
+      }
+
+      localStorage.setItem("role", user.role);
+
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify({
+          id: user.user_id,
+          name: user.full_name,
+          email: user.email,
+          role: user.role,
+        })
+      );
+
+      navigate("/home");
+    } catch (error) {
+      console.log(error);
+      alert("Cannot connect to the server.");
     }
-
-    if (user.status === "Suspended") {
-      alert("Your account has been suspended. Please contact the administrator.");
-      return;
-    }
-
-    localStorage.setItem("role", "user");
-
-    localStorage.setItem(
-      "currentUser",
-      JSON.stringify({
-        name: user.fullName,
-        email: user.email,
-        role: user.role || "user",
-      })
-    );
-
-    navigate("/home");
   };
 
   return (
