@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "../css/Admin.css";
 
+const BASE_URL = import.meta.env.VITE_SERVER_URL;
+
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [searchUser, setSearchUser] = useState("");
@@ -16,19 +18,19 @@ function AdminDashboard() {
   }, []);
 
   const getUsers = async () => {
-    const response = await fetch("http://localhost:3000/users");
+    const response = await fetch(`${BASE_URL}/users`);
     const data = await response.json();
     setUsers(data);
   };
 
   const getItems = async () => {
-    const response = await fetch("http://localhost:3000/items");
+    const response = await fetch(`${BASE_URL}/items`);
     const data = await response.json();
     setItems(data);
   };
 
   const getRequests = async () => {
-    const response = await fetch("http://localhost:3000/requests");
+    const response = await fetch(`${BASE_URL}/requests`);
     const data = await response.json();
     setRequests(data);
   };
@@ -72,7 +74,7 @@ function AdminDashboard() {
       joined_date: String(user.joined_date).split("T")[0],
     };
 
-    const response = await fetch(`http://localhost:3000/users/${user.user_id}`, {
+    const response = await fetch(`${BASE_URL}/users/${user.user_id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -87,9 +89,7 @@ function AdminDashboard() {
       return;
     }
 
-    setUsers(
-      users.map((u) => (u.user_id === user.user_id ? data : u))
-    );
+    setUsers(users.map((u) => (u.user_id === user.user_id ? data : u)));
   };
 
   const getUserItemsCount = (user) => {
@@ -101,7 +101,7 @@ function AdminDashboard() {
   };
 
   const handleDeleteItem = async (id) => {
-    const response = await fetch(`http://localhost:3000/items/${id}`, {
+    const response = await fetch(`${BASE_URL}/items/${id}`, {
       method: "DELETE",
     });
 
@@ -242,64 +242,30 @@ function AdminDashboard() {
               <div className="admin-panel-card">
                 <h3>Popular Categories</h3>
 
-                <div className="category-row">
-                  <p>
-                    Tools <span>{getPercentage(categoryCounts.Tools)}%</span>
-                  </p>
-                  <div className="progress">
-                    <div
-                      className="tools-bar"
-                      style={{ width: `${getPercentage(categoryCounts.Tools)}%` }}
-                    ></div>
-                  </div>
-                </div>
+                {Object.keys(categoryCounts).map((category) => (
+                  <div className="category-row" key={category}>
+                    <p>
+                      {category} <span>{getPercentage(categoryCounts[category])}%</span>
+                    </p>
 
-                <div className="category-row">
-                  <p>
-                    Sports & Outdoors{" "}
-                    <span>{getPercentage(categoryCounts["Sports & Outdoors"])}%</span>
-                  </p>
-                  <div className="progress">
-                    <div
-                      className="sports-bar"
-                      style={{
-                        width: `${getPercentage(
-                          categoryCounts["Sports & Outdoors"]
-                        )}%`,
-                      }}
-                    ></div>
+                    <div className="progress">
+                      <div
+                        className={
+                          category === "Tools"
+                            ? "tools-bar"
+                            : category === "Sports & Outdoors"
+                            ? "sports-bar"
+                            : category === "Electronics"
+                            ? "electronics-bar"
+                            : "entertainment-bar"
+                        }
+                        style={{
+                          width: `${getPercentage(categoryCounts[category])}%`,
+                        }}
+                      ></div>
+                    </div>
                   </div>
-                </div>
-
-                <div className="category-row">
-                  <p>
-                    Electronics{" "}
-                    <span>{getPercentage(categoryCounts.Electronics)}%</span>
-                  </p>
-                  <div className="progress">
-                    <div
-                      className="electronics-bar"
-                      style={{
-                        width: `${getPercentage(categoryCounts.Electronics)}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="category-row">
-                  <p>
-                    Entertainment{" "}
-                    <span>{getPercentage(categoryCounts.Entertainment)}%</span>
-                  </p>
-                  <div className="progress">
-                    <div
-                      className="entertainment-bar"
-                      style={{
-                        width: `${getPercentage(categoryCounts.Entertainment)}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </>
@@ -344,10 +310,7 @@ function AdminDashboard() {
                           <span>👩</span>
                           <div>
                             <strong>{user.full_name}</strong>
-                            <p>
-                              Joined{" "}
-                              {String(user.joined_date).split("T")[0]}
-                            </p>
+                            <p>Joined {String(user.joined_date).split("T")[0]}</p>
                           </div>
                         </div>
                       </td>
@@ -355,13 +318,10 @@ function AdminDashboard() {
                       <td>{user.email}</td>
 
                       <td>
-                        <span className="role-badge">
-                          {user.role || "user"}
-                        </span>
+                        <span className="role-badge">{user.role || "user"}</span>
                       </td>
 
                       <td>{getUserItemsCount(user)}</td>
-
                       <td>{getUserRequestsCount(user)}</td>
 
                       <td>
@@ -385,9 +345,7 @@ function AdminDashboard() {
                           }
                           onClick={() => toggleUserStatus(user)}
                         >
-                          {user.status === "Suspended"
-                            ? "Activate"
-                            : "Suspend"}
+                          {user.status === "Suspended" ? "Activate" : "Suspend"}
                         </button>
                       </td>
                     </tr>
@@ -401,7 +359,6 @@ function AdminDashboard() {
         {activeTab === "content" && (
           <div className="admin-panel-card content-moderation-card">
             <h3>Content Moderation</h3>
-
             <p>Review and remove inappropriate or policy-violating items</p>
 
             <table className="users-table">
@@ -428,7 +385,7 @@ function AdminDashboard() {
                       <td>
                         <div className="user-info">
                           <img
-                            src={`http://localhost:3000${item.image_path}`}
+                            src={`${BASE_URL}${item.image_path}`}
                             alt={item.name}
                             style={{
                               width: "38px",
@@ -438,8 +395,7 @@ function AdminDashboard() {
                             }}
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src =
-                                "http://localhost:3000/uploads/default-item.png";
+                              e.target.src = `${BASE_URL}/uploads/default-item.png`;
                             }}
                           />
 
@@ -450,9 +406,7 @@ function AdminDashboard() {
                       <td>User #{item.user_id}</td>
 
                       <td>
-                        <span className="category-badge">
-                          {item.category}
-                        </span>
+                        <span className="category-badge">{item.category}</span>
                       </td>
 
                       <td>{item.condition}</td>

@@ -4,6 +4,8 @@ import FeatureSection from "../components/FeatureSection";
 import SearchFilters from "../components/SearchFilters";
 import ItemsGrid from "../components/ItemsGrid";
 
+const BASE_URL = import.meta.env.VITE_SERVER_URL;
+
 function Home() {
   const loggedInUser =
     JSON.parse(localStorage.getItem("currentUser")) || {};
@@ -23,7 +25,7 @@ function Home() {
   useEffect(() => {
     const getItems = async () => {
       try {
-        const response = await fetch("http://localhost:3000/items");
+        const response = await fetch(`${BASE_URL}/items`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -42,8 +44,8 @@ function Home() {
           condition: item.condition,
           imagePath: item.image_path,
           imageUrl: item.image_path
-            ? `http://localhost:3000${item.image_path}`
-            : "http://localhost:3000/uploads/default-item.png",
+            ? `${BASE_URL}${item.image_path}`
+            : `${BASE_URL}/uploads/default-item.png`,
         }));
 
         setItems(formattedItems);

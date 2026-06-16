@@ -2,13 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/Dashboard.css";
 
+const BASE_URL = import.meta.env.VITE_SERVER_URL;
+
 function Dashboard() {
   const navigate = useNavigate();
 
   const loggedInUser =
     JSON.parse(localStorage.getItem("currentUser")) || {};
 
-  const currentUserId = loggedInUser.id;
+  const currentUserId = Number(loggedInUser.id);
 
   const [items, setItems] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -20,7 +22,7 @@ function Dashboard() {
 
   const getItems = async () => {
     try {
-      const response = await fetch("http://localhost:3000/items");
+      const response = await fetch(`${BASE_URL}/items`);
       const data = await response.json();
 
       setItems(data);
@@ -31,7 +33,7 @@ function Dashboard() {
 
   const getRequests = async () => {
     try {
-      const response = await fetch("http://localhost:3000/requests");
+      const response = await fetch(`${BASE_URL}/requests`);
       const data = await response.json();
 
       setRequests(data);
@@ -63,7 +65,7 @@ function Dashboard() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/items/${id}`, {
+      const response = await fetch(`${BASE_URL}/items/${id}`, {
         method: "DELETE",
       });
 
@@ -129,13 +131,17 @@ function Dashboard() {
                 <div className="my-item-info">
                   <div className="my-item-icon">
                     <img
-                      src={`http://localhost:3000${item.image_path}`}
+                      src={`${BASE_URL}${item.image_path}`}
                       alt={item.name}
                       style={{
                         width: "55px",
                         height: "55px",
                         objectFit: "cover",
                         borderRadius: "10px",
+                      }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = `${BASE_URL}/uploads/default-item.png`;
                       }}
                     />
                   </div>
