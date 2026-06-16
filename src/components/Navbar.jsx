@@ -10,59 +10,79 @@ import { FiUser } from "react-icons/fi";
 function Navbar({ role }) {
   const navigate = useNavigate();
 
- const handleLogout = () => {
-  localStorage.removeItem("currentUser");
-  localStorage.removeItem("role");
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("role");
 
-  navigate("/login");
-};
+    navigate("/login");
+  };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-left">
-        <div className="navbar-logo">
-          <img src={logo} alt="BorrowHub Logo" />
-          <h2>BorrowHub</h2>
+    <nav className="navbar navbar-expand-lg shadow-sm px-4 py-3">
+      <div className="container-fluid">
+        <div className="d-flex align-items-center">
+
+          <div className="navbar-logo d-flex align-items-center me-4">
+            <img src={logo} alt="BorrowHub Logo" />
+            <h2 className="ms-2 mb-0">BorrowHub</h2>
+          </div>
+
+          <Link
+            to="/home"
+            className="nav-link d-flex align-items-center me-3"
+          >
+            <GoHome className="me-1" />
+            <span>Home</span>
+          </Link>
+
+          {role === "user" && (
+            <>
+              <Link
+                to="/add-item"
+                className="nav-link d-flex align-items-center me-3"
+              >
+                <IoAddCircleOutline className="me-1" />
+                <span>Add Item</span>
+              </Link>
+
+              <Link
+                to="/requests"
+                className="nav-link d-flex align-items-center"
+              >
+                <LuMessageSquareMore className="me-1" />
+                <span>Requests</span>
+              </Link>
+            </>
+          )}
         </div>
 
-        <Link to="/home" className="nav-link">
-          <GoHome />
-          <span>Home</span>
-        </Link>
+        <div className="d-flex align-items-center">
 
-        {role === "user" && (
-          <>
-            <Link to="/add-item" className="nav-link">
-              <IoAddCircleOutline />
-              <span>Add Item</span>
+          {role === "admin" ? (
+            <Link
+              to="/admin"
+              className="btn btn-success me-3"
+            >
+              ♻ Admin Panel
             </Link>
-
-            <Link to="/requests" className="nav-link">
-              <LuMessageSquareMore />
-              <span>Requests</span>
+          ) : (
+            <Link
+              to="/dashboard"
+              className="nav-link d-flex align-items-center me-3"
+            >
+              <FiUser className="me-1" />
+              <span>Dashboard</span>
             </Link>
-          </>
-        )}
-      </div>
+          )}
 
-      <div className="navbar-right">
-        {role === "admin" ? (
-          <Link to="/admin" className="admin-panel-btn">
-            ♻ Admin Panel
-          </Link>
-        ) : (
-          <Link to="/dashboard" className="nav-link">
-            <FiUser />
-            <span>Dashboard</span>
-          </Link>
-        )}
+          <button
+            className="btn btn-outline-danger"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+        </div>
       </div>
     </nav>
   );
